@@ -32,3 +32,13 @@ def listar_tarefas():
         tarefas.append(info)
 
     return tarefas
+
+@APP.get("/tarefa/{id}")
+def listar_tarefa_especifica(id: int):
+    if len(LISTA_TAREFAS) == 0:
+        return {"mensagem": "Não há tarefas cadastradas"}
+
+    if id >= 0 and id < len(LISTA_TAREFAS):
+        return LISTA_TAREFAS[id]
+
+    return {"mensagem": "Não há tarefa com esse ID"}
