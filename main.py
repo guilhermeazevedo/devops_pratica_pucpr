@@ -1,6 +1,8 @@
 from fastapi import FastAPI
 from datetime import datetime
 
+import requests
+
 LISTA_TAREFAS = []
 APP = FastAPI()
 
@@ -89,11 +91,10 @@ def atualizar_tarefa(id: int, titulo: str = "", descricao: str = "", concluido: 
     if descricao !=  "":
         LISTA_TAREFAS[indice]['descricao'] = descricao
     
-    #if concluido == True:
-        #requests.post(
-        #    f"http://notificacoes:8000/notificar?titulo={tarefa['titulo']}&data_finalizacao={datetime.now()}",
-        #    timeout=10
-        #)
+    if concluido == True:
+        requests.post(
+            f"http://localhost:8001/notificar?titulo={tarefa['titulo']}&data_finalizacao={datetime.now()}"
+        )
 
     LISTA_TAREFAS[indice]['concluido'] = concluido
 
