@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from datetime import datetime
+from fastapi.exceptions import HTTPException
 
 import requests
 
@@ -52,14 +53,11 @@ def listar_tarefa_especifica(id: int):
 
 @APP.post("/tarefas", status_code=201)
 def criar_tarefa(id: int, titulo: str, descricao: str):
-    global LISTA_TAREFAS
-
     tarefa_existe = verificar_existencia_tarefa(id)
 
     if tarefa_existe:
-        #ex = HTTPException(status_code=202, detail={"mensagem": "TAREFA JÁ EXISTE!"})
-        #raise ex
-        return {"mensagem": "TAREFA JÁ EXISTE"}
+        ex = HTTPException(status_code=202, detail={"mensagem": "TAREFA JÁ EXISTE"})
+        raise ex
     
     nova = nova_tarefa(id, titulo, descricao)
 
