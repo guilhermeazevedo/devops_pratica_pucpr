@@ -8,6 +8,7 @@ LISTA_TAREFAS = []
 APP = FastAPI()
 
 def nova_tarefa(id: int, titulo: str, descricao: str):
+    """Função auxiliar para criar uma tarefa usando dicionário (`dict`)"""
     return {
         "id": id,
         "titulo": titulo,
@@ -27,32 +28,37 @@ def verificar_existencia_tarefa(id: int):
 def index():
     return "Olá, DevOps!"
 
-
 @APP.get("/tarefas")
 def listar_tarefas():
+    # Lista tarefas (somente id e titulo)
     if len(LISTA_TAREFAS) == 0:
         return LISTA_TAREFAS
 
     tarefas = []
-
+    
     for tarefa in LISTA_TAREFAS:
         info = {"id": tarefa['id'], "titulo": tarefa['titulo']}
         tarefas.append(info)
 
     return tarefas
 
-@APP.get("/tarefa/{id}")
+@APP.get("/tarefas/{id}")
 def listar_tarefa_especifica(id: int):
+    mensagem_padrao = {"mensagem": "Não existe nenhuma tarefa"}
     if len(LISTA_TAREFAS) == 0:
-        return {"mensagem": "Não há tarefas cadastradas"}
-
+        return mensagem_padrao
+    
+    # ID da tarefa é o índice na lista
     if id >= 0 and id < len(LISTA_TAREFAS):
         return LISTA_TAREFAS[id]
+    
+    return mensagem_padrao
 
-    return {"mensagem": "Não há tarefa com esse ID"}
 
 @APP.post("/tarefas", status_code=201)
 def criar_tarefa(id: int, titulo: str, descricao: str):
+    global LISTA_TAREFAS
+
     tarefa_existe = verificar_existencia_tarefa(id)
 
     if tarefa_existe:
@@ -91,7 +97,7 @@ def atualizar_tarefa(id: int, titulo: str = "", descricao: str = "", concluido: 
     
     if concluido == True:
         requests.post(
-            f"http://localhost:8002/notificar?titulo={tarefa['titulo']}&data_finalizacao={datetime.now()}",
+            f"http://notificacoes:8000/notificar?titulo={tarefa['titulo']}&data_finalizacao={datetime.now()}",
             timeout=10
         )
 
