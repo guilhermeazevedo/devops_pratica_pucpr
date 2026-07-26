@@ -116,7 +116,7 @@ def atualizar_tarefa(id: int, titulo: str = "", descricao: str = "", concluido: 
 
     if not tarefa_existe:
         LOGGER.error(f"Rota PUT '/tarefas/{id}' acessada. Tarefa NÃO existe.")
-        return {"mensagem": "TAREFA NÃO EXISTE!"}
+        return {"mensagem": "TAREFA NÃO EXISTE"}
     
     tarefa = None
     for indice in range(len(LISTA_TAREFAS)):
