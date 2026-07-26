@@ -95,7 +95,7 @@ def criar_tarefa(id: int, titulo: str, descricao: str):
     tarefa_existe = verificar_existencia_tarefa(id)
 
     if tarefa_existe:
-        ex = HTTPException(status_code=202, detail={"mensagem": "TAREFA JÁ EXISTE!"})
+        ex = HTTPException(status_code=202, detail={"mensagem": "TAREFA JÁ EXISTE"})
         LOGGER.error(f"Rota POST '/tarefas/' acessada. Tarefa já existe.")
         raise ex
     
