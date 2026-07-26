@@ -54,7 +54,7 @@ metadata:
   labels:
     app: deploy-notificacao
 spec:
-  replicas: 5
+  replicas: 1
   selector:
     matchLabels:
       app: deploy-notificacao
@@ -68,4 +68,4 @@ spec:
           image: guilhermeazvdo/curso-devops
           args: ["-e", "notificacao:APP_NOTIFICACAO"]
           ports:
-            - containerPort: 8000
+            - containerPort: 8000  
