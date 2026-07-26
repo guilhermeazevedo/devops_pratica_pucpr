@@ -97,6 +97,7 @@ def listar_tarefa_especifica(id: int):
     
     return mensagem_padrao
 
+
 @APP.post("/tarefas", status_code=201)
 def criar_tarefa(id: int, titulo: str, descricao: str):
     global LISTA_TAREFAS, METRICAS
@@ -187,7 +188,6 @@ def apagar_tarefa(id: int):
 
     return {"mensagem": "OK"}
 
-
 @APP.get("/metricas")
 def metricas():
     tempo_medio_total = timedelta()
@@ -204,3 +204,8 @@ def metricas():
     LOGGER.info("Rota '/metricas' acessada.")
 
     return METRICAS
+
+@APP.get("/health")
+def health():
+    LOGGER.info("Rota '/metricas' acessada.")
+    return {"mensagem": "healthy"}
