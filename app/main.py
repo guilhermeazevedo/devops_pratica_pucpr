@@ -1,21 +1,48 @@
 from fastapi import FastAPI
-from datetime import datetime
 from fastapi.exceptions import HTTPException
 
+from datetime import datetime
+
 import requests
+import logging
+import os
+
+level = os.environ.get("LOG_LEVEL", logging.INFO)
+
+if level == "DEBUG":
+    level = logging.DEBUG
+else:
+    level = logging.INFO
 
 LISTA_TAREFAS = []
 APP = FastAPI()
 
+LOGGER = logging.getLogger("DevOps")
+LOGGER.setLevel(level)
+
+stream_handler = logging.StreamHandler()
+file_handler   = logging.FileHandler("api.log", encoding='utf-8')
+fmt = logging.Formatter(fmt="%(name)s | %(asctime)s | %(filename)s:%(lineno)s | %(levelname)s | %(message)s")
+
+stream_handler.setFormatter(fmt)
+file_handler.setFormatter(fmt)
+
+LOGGER.addHandler(stream_handler)
+LOGGER.addHandler(file_handler)
+
 def nova_tarefa(id: int, titulo: str, descricao: str):
     """Função auxiliar para criar uma tarefa usando dicionário (`dict`)"""
-    return {
+    tarefa = {
         "id": id,
         "titulo": titulo,
         "descricao": descricao,
         "concluido": False,
         "criado_em": datetime.now()
     }
+
+    LOGGER.debug(f"Criando tarefa='{str(tarefa)}'")
+
+    return tarefa
 
 def verificar_existencia_tarefa(id: int):
     """Função auxiliar para verificar a existência de uma tarefa com base no seu ID"""
@@ -26,11 +53,15 @@ def verificar_existencia_tarefa(id: int):
 
 @APP.get("/")
 def index():
+    LOGGER.info(f"Rota '/' foi acessada")
     return "Olá, DevOps!"
 
 @APP.get("/tarefas")
 def listar_tarefas():
     # Lista tarefas (somente id e titulo)
+    
+    LOGGER.info(f"Rota '/tarefas' foi acessada")
+
     if len(LISTA_TAREFAS) == 0:
         return LISTA_TAREFAS
 
@@ -46,10 +77,12 @@ def listar_tarefas():
 def listar_tarefa_especifica(id: int):
     mensagem_padrao = {"mensagem": "Não existe nenhuma tarefa"}
     if len(LISTA_TAREFAS) == 0:
+        LOGGER.error(f"Rota '/tarefas/{id} acessada. Mensagem: {mensagem_padrao['mensagem']}")
         return mensagem_padrao
     
     # ID da tarefa é o índice na lista
     if id >= 0 and id < len(LISTA_TAREFAS):
+        LOGGER.info(f"Rota '/tarefas/{id} acessada.")
         return LISTA_TAREFAS[id]
     
     return mensagem_padrao
@@ -62,12 +95,15 @@ def criar_tarefa(id: int, titulo: str, descricao: str):
     tarefa_existe = verificar_existencia_tarefa(id)
 
     if tarefa_existe:
-        ex = HTTPException(status_code=202, detail={"mensagem": "TAREFA JÁ EXISTE"})
+        ex = HTTPException(status_code=202, detail={"mensagem": "TAREFA JÁ EXISTE!"})
+        LOGGER.error(f"Rota POST '/tarefas/' acessada. Tarefa já existe.")
         raise ex
     
     nova = nova_tarefa(id, titulo, descricao)
 
     LISTA_TAREFAS.append(nova)
+
+    LOGGER.info(f"Rota POST '/tarefas' acessada. Tarefa id={id} criada.")
 
     return {"mensagem": "OK"}
 
@@ -79,6 +115,7 @@ def atualizar_tarefa(id: int, titulo: str = "", descricao: str = "", concluido: 
     tarefa_existe = verificar_existencia_tarefa(id)
 
     if not tarefa_existe:
+        LOGGER.error(f"Rota PUT '/tarefas/{id}' acessada. Tarefa NÃO existe.")
         return {"mensagem": "TAREFA NÃO EXISTE!"}
     
     tarefa = None
@@ -102,9 +139,10 @@ def atualizar_tarefa(id: int, titulo: str = "", descricao: str = "", concluido: 
         )
 
     LISTA_TAREFAS[indice]['concluido'] = concluido
+    LOGGER.debug(f"Tarefa atualizada = {LISTA_TAREFAS[indice]}")
+    LOGGER.info(f"Rota PUT '/tarefas/{id}' acessada. Tarefa id={id} atualizada.")
 
     return {"mensagem": "OK"}
-
 
 @APP.delete("/tarefas/{id}")
 def apagar_tarefa(id: int):
@@ -113,6 +151,7 @@ def apagar_tarefa(id: int):
     tarefa_existe = verificar_existencia_tarefa(id)
 
     if not tarefa_existe:
+        LOGGER.error(f"Rota PUT '/tarefas/{id}' acessada. Tarefa NÃO existe.")
         return {"mensagem": "TAREFA NÃO EXISTE"}
 
     tarefa = None
@@ -124,5 +163,7 @@ def apagar_tarefa(id: int):
             break
     
     LISTA_TAREFAS.pop(indice)
+
+    LOGGER.info(f"Rota DELETE '/tarefas/{id}' acessada. Tarefa id={id} removida.")
 
     return {"mensagem": "OK"}
