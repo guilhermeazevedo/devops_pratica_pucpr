@@ -31,3 +31,5 @@ def test_apagar_tarefa():
 
     assert requisicao['qtde_tarefas_removidas'] == 3
     assert requisicao['qtde_tarefas'] == 0
+
+ 
